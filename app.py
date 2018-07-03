@@ -36,16 +36,16 @@ def load_exchange_rates(url):
 
 
 @app.route("/calc_exchange/", methods=['POST'])
-def calc_exchange():
-    data = request.json
-    #return json.dumps(request.json)
+def calc_exchange(data = None):
+    if not data:
+        data = request.json
     reference_date = data["reference_date"]
     currency_src = data["src_currency"]
     currency_dest = data["dest_currency"]
     amount = data["amount"]
 
     if not reference_date in currencies:
-        return {"message": "Error date not found!"}
+        return json.dumps({"message": "Error date not found!"})
     
     currency_src = currency_src.upper()
     currency_dest = currency_dest.upper()
@@ -58,11 +58,14 @@ def calc_exchange():
         conv = amount * float(rate_dest)
     
     return json.dumps({'amount': conv, 'currency':currency_dest})
-
+    
 if __name__ == '__main__':
     load_exchange_rates(XML_CURRENCY_EXCHANGE_RATE)
-    # load from file for speedup tests
-    #load_exchange_rates("data/eurofxref-hist-90d.xml")
     app.run(host='0.0.0.0', port=5000, debug=True)
 
+    # test:
+    #load_exchange_rates("data/eurofxref-hist-90d.xml")
+    #print ( json.loads( calc_exchange({"amount": 1, "src_currency": "EUR", "dest_currency": "USD", "reference_date": "2018-07-02"}) )["amount"]  )
+
+    
 
